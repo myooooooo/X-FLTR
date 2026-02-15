@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-FLTR / THE VOID ENGINE</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- HEADER: Cyber-Brutalist Identity -->
+    <div id="header">
+        <div class="ascii-logo">
+            <pre>
+╭━━━╮╱╱╭╮╱╱╱╱╱╱╱╭━━━━╮
+┃╭━╮┃╱╱┃┃╱╱╱╱╱╱╱┃╭╮╭╮┃
+┃╰━╯┣━━┫┃╭━━┳━╮╱╰╯┃┃┣┻┳━━┳━╮
+┃╭━━┫╭╮┃┃┃╭╮┃╭╮╮╱╱┃┃┃╭┫╭╮┃╭╮╮
+┃┃╱╱┃╰╯┃╰┫╰╯┃┃┃┃╱╱┃┃┃┃┃╰╯┃┃┃┃
+╰╯╱╱╰━━┻━┻━━┻╯╰╯╱╱╰╯╰╯╰━━┻╯╰╯
+            </pre>
+        </div>
+        <h1>X-FLTR / THE VOID ENGINE</h1>
+        <p class="signature">— DEVELOPED BY ANSSAFOU ZINEB —</p>
+        <p class="version">v2.0.0 | ADOBE UXP | MMI PORTFOLIO 2025</p>
+    </div>
+
+    <!-- DATA STREAM: Live Console -->
+    <div id="data-stream-container">
+        <div class="stream-header">[DATA_STREAM]</div>
+        <div id="data-stream" class="stream-content">
+            <div class="stream-line system">&gt; SYSTEM INITIALIZED</div>
+            <div class="stream-line info">&gt; AWAITING IMAGE LAYER SELECTION...</div>
+        </div>
+    </div>
+
+    <!-- FILTERS ACCORDION: 5 Categories -->
+    <div id="filters-container">
+        <!-- CATEGORY 1: GLITCH -->
+        <div class="category-section">
+            <button class="category-header" data-category="glitch">
+                <span class="category-icon">[▸]</span>
+                <span class="category-name">GLITCH</span>
+                <span class="filter-count">8 filters</span>
+            </button>
+            <div class="category-content" id="glitch-filters" style="display: none;">
+                <button class="filter-btn" data-filter="pixel_sort_h">Pixel Sort Horizontal</button>
+                <button class="filter-btn" data-filter="pixel_sort_v">Pixel Sort Vertical</button>
+                <button class="filter-btn" data-filter="rgb_split_linear">RGB Split Linear</button>
+                <button class="filter-btn" data-filter="rgb_split_wave">RGB Split Wave</button>
+                <button class="filter-btn" data-filter="datamosh">Datamosh Blocks</button>
+                <button class="filter-btn" data-filter="scanline">Scanline Corrupt</button>
+                <button class="filter-btn" data-filter="bitcrush">Bit Crush</button>
+                <button class="filter-btn" data-filter="vhs_noise">VHS Noise</button>
+            </div>
+        </div>
+
+        <!-- CATEGORY 2: GENERATIVE -->
+        <div class="category-section">
+            <button class="category-header" data-category="generative">
+                <span class="category-icon">[▸]</span>
+                <span class="category-name">GENERATIVE</span>
+                <span class="filter-count">8 filters</span>
+            </button>
+            <div class="category-content" id="generative-filters" style="display: none;">
+                <button class="filter-btn" data-filter="reaction_diffusion">Reaction-Diffusion</button>
+                <button class="filter-btn" data-filter="voronoi">Voronoi Cells</button>
+                <button class="filter-btn" data-filter="mandelbrot">Mandelbrot Map</button>
+                <button class="filter-btn" data-filter="flow_field">Flow Field</button>
+                <button class="filter-btn" data-filter="perlin_warp">Perlin Warp</button>
+                <button class="filter-btn" data-filter="fractal_noise">Fractal Noise</button>
+                <button class="filter-btn" data-filter="cellular_automata">Cellular Automata</button>
+                <button class="filter-btn" data-filter="wave_distortion">Wave Distortion</button>
+            </div>
+        </div>
+
+        <!-- CATEGORY 3: RETRO-TECH -->
+        <div class="category-section">
+            <button class="category-header" data-category="retro">
+                <span class="category-icon">[▸]</span>
+                <span class="category-name">RETRO-TECH</span>
+                <span class="filter-count">8 filters</span>
+            </button>
+            <div class="category-content" id="retro-filters" style="display: none;">
+                <button class="filter-btn" data-filter="gameboy">GameBoy 4-bit</button>
+                <button class="filter-btn" data-filter="c64">C64 Palette</button>
+                <button class="filter-btn" data-filter="bayer_dither">Bayer Dithering</button>
+                <button class="filter-btn" data-filter="ascii">ASCII Render</button>
+                <button class="filter-btn" data-filter="crt">CRT Curvature</button>
+                <button class="filter-btn" data-filter="phosphor">Phosphor Glow</button>
+                <button class="filter-btn" data-filter="terminal">Terminal Text</button>
+                <button class="filter-btn" data-filter="dotmatrix">Dot Matrix</button>
+            </div>
+        </div>
+
+        <!-- CATEGORY 4: GEOMETRIC -->
+        <div class="category-section">
+            <button class="category-header" data-category="geometric">
+                <span class="category-icon">[▸]</span>
+                <span class="category-name">GEOMETRIC</span>
+                <span class="filter-count">8 filters</span>
+            </button>
+            <div class="category-content" id="geometric-filters" style="display: none;">
+                <button class="filter-btn" data-filter="hexagon">Hexagon Mosaic</button>
+                <button class="filter-btn" data-filter="stained_glass">Stained Glass</button>
+                <button class="filter-btn" data-filter="kaleidoscope">Kaleidoscope</button>
+                <button class="filter-btn" data-filter="voxel">Isometric Voxels</button>
+                <button class="filter-btn" data-filter="triangle_mesh">Triangle Mesh</button>
+                <button class="filter-btn" data-filter="polygon_reduce">Polygon Reduce</button>
+                <button class="filter-btn" data-filter="crystal">Crystal Facets</button>
+                <button class="filter-btn" data-filter="radial_blur">Radial Blur</button>
+            </div>
+        </div>
+
+        <!-- CATEGORY 5: EXPERIMENTAL -->
+        <div class="category-section">
+            <button class="category-header" data-category="experimental">
+                <span class="category-icon">[▸]</span>
+                <span class="category-name">EXPERIMENTAL</span>
+                <span class="filter-count">10 filters</span>
+            </button>
+            <div class="category-content" id="experimental-filters" style="display: none;">
+                <button class="filter-btn" data-filter="chromatic_prism">Chromatic Prism</button>
+                <button class="filter-btn" data-filter="infrared">Infrared Sim</button>
+                <button class="filter-btn" data-filter="neon_edges">Neon Edges</button>
+                <button class="filter-btn" data-filter="bloom">Bloom Glow</button>
+                <button class="filter-btn" data-filter="posterize">Posterize</button>
+                <button class="filter-btn" data-filter="solarize">Solarize</button>
+                <button class="filter-btn" data-filter="edge_detect">Edge Detect</button>
+                <button class="filter-btn" data-filter="emboss">Emboss</button>
+                <button class="filter-btn" data-filter="oil_paint">Oil Paint</button>
+                <button class="filter-btn" data-filter="watercolor">Watercolor</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTROL PANEL -->
+    <div id="control-panel">
+        <button id="apply-filter" class="btn-primary" disabled>
+            APPLY SELECTED FILTER
+        </button>
+        <div class="status-indicator">
+            <span id="status-text">NO FILTER SELECTED</span>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div id="footer">
+        <p>DIGITAL CREATION LAB | MMI PORTFOLIO 2025</p>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
