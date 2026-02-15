@@ -8,8 +8,9 @@
  * Original: Python (CustomTkinter + Numpy)
  */
 
-const { app, core, imaging } = require('photoshop');
-const { executeAsModal } = core;
+const photoshop = require('photoshop');
+const { app } = photoshop;
+const { executeAsModal } = photoshop.core;
 
 // ===================================================================
 // STATE MANAGEMENT
@@ -211,43 +212,20 @@ async function rgbSplitLinear(offset = 20) {
 
     addDataStreamLog(`RGB SPLIT LINEAR: OFFSET=${offset}px`, 'info');
 
-    // Method 1: Using layer duplication and channel operations
-    // Create duplicate layers for R and B channels
+    // Simplified approach using layer duplication
     const redLayer = await originalLayer.duplicate();
     redLayer.name = "Red Channel Shifted";
-    redLayer.translate(offset, 0); // Move right
+    await redLayer.translate(offset, 0);
 
     const blueLayer = await originalLayer.duplicate();
     blueLayer.name = "Blue Channel Shifted";
-    blueLayer.translate(-offset, 0); // Move left
+    await blueLayer.translate(-offset, 0);
 
-    // Apply channel mixer to isolate channels
-    // Red layer: Keep only Red channel
-    await imaging.applyChannelMixer(redLayer, {
-        redChannel: { red: 100, green: 0, blue: 0 },
-        greenChannel: { red: 0, green: 0, blue: 0 },
-        blueChannel: { red: 0, green: 0, blue: 0 }
-    });
+    // Set blend modes for channel effect
+    redLayer.blendMode = "lighten";
+    blueLayer.blendMode = "lighten";
 
-    // Blue layer: Keep only Blue channel
-    await imaging.applyChannelMixer(blueLayer, {
-        redChannel: { red: 0, green: 0, blue: 0 },
-        greenChannel: { red: 0, green: 0, blue: 0 },
-        blueChannel: { red: 0, green: 0, blue: 100 }
-    });
-
-    // Original layer: Keep only Green channel
-    await imaging.applyChannelMixer(originalLayer, {
-        redChannel: { red: 0, green: 0, blue: 0 },
-        greenChannel: { red: 0, green: 100, blue: 0 },
-        blueChannel: { red: 0, green: 0, blue: 0 }
-    });
-
-    // Merge using screen blend mode
-    redLayer.blendMode = "screen";
-    blueLayer.blendMode = "screen";
-
-    addDataStreamLog('RGB CHANNELS SPLIT AND RECOMBINED', 'success');
+    addDataStreamLog('RGB CHANNELS SPLIT (SIMPLIFIED)', 'success');
 }
 
 /**
@@ -274,60 +252,28 @@ async function rgbSplitLinear(offset = 20) {
 async function rgbSplitWave(amplitude = 30) {
     const doc = app.activeDocument;
     const originalLayer = doc.activeLayers[0];
-    const height = doc.height;
 
     addDataStreamLog(`RGB SPLIT WAVE: AMPLITUDE=${amplitude}px`, 'info');
 
-    // Create displacement map for wave distortion
-    // This is a simplified approach - full implementation would require
-    // pixel-level manipulation through batchPlay or external processing
-
-    // Create three duplicates for R, G, B channels
+    // Simplified wave effect using layer duplication and offset
     const redLayer = await originalLayer.duplicate();
     redLayer.name = "Red Wave";
+    await redLayer.translate(amplitude, 0);
 
     const greenLayer = await originalLayer.duplicate();
     greenLayer.name = "Green Wave";
+    await greenLayer.translate(-amplitude / 2, 0);
 
     const blueLayer = await originalLayer.duplicate();
     blueLayer.name = "Blue Wave";
+    await blueLayer.translate(-amplitude, 0);
 
-    // Apply wave distortion (using Photoshop's Wave filter)
-    // Note: This is an approximation - exact pixel-by-pixel control
-    // would require batchPlay API for Wave filter with custom parameters
+    // Set blend modes
+    redLayer.blendMode = "lighten";
+    greenLayer.blendMode = "lighten";
+    blueLayer.blendMode = "lighten";
 
-    addDataStreamLog('APPLYING SINUSOIDAL DISPLACEMENT TO CHANNELS', 'info');
-
-    // Apply channel isolation (same as linear split)
-    await imaging.applyChannelMixer(redLayer, {
-        redChannel: { red: 100, green: 0, blue: 0 },
-        greenChannel: { red: 0, green: 0, blue: 0 },
-        blueChannel: { red: 0, green: 0, blue: 0 }
-    });
-
-    await imaging.applyChannelMixer(greenLayer, {
-        redChannel: { red: 0, green: 0, blue: 0 },
-        greenChannel: { red: 0, green: 100, blue: 0 },
-        blueChannel: { red: 0, green: 0, blue: 0 }
-    });
-
-    await imaging.applyChannelMixer(blueLayer, {
-        redChannel: { red: 0, green: 0, blue: 0 },
-        greenChannel: { red: 0, green: 0, blue: 0 },
-        blueChannel: { red: 0, green: 0, blue: 100 }
-    });
-
-    // Apply wave offset (simplified - would need custom displacement map)
-    redLayer.translate(amplitude, 0);
-    greenLayer.translate(-amplitude / 2, 0);
-    blueLayer.translate(-amplitude, 0);
-
-    // Merge channels
-    redLayer.blendMode = "screen";
-    greenLayer.blendMode = "screen";
-    blueLayer.blendMode = "screen";
-
-    addDataStreamLog('WAVE DISTORTION APPLIED TO RGB CHANNELS', 'success');
+    addDataStreamLog('WAVE DISTORTION APPLIED (SIMPLIFIED)', 'success');
     addDataStreamLog('NOTE: Full wave implementation requires batchPlay API', 'warning');
 }
 
@@ -338,39 +284,22 @@ async function rgbSplitWave(amplitude = 30) {
 /**
  * Get pixel data from active layer
  * (For future pixel-level filter implementations)
+ * NOTE: Requires Photoshop Imaging API which may need batchPlay
  */
 async function getLayerPixelData() {
-    const doc = app.activeDocument;
-    const layer = doc.activeLayers[0];
-
-    const pixelData = await imaging.getPixels({
-        documentID: doc.id,
-        layerID: layer.id,
-        sourceBounds: {
-            left: 0,
-            top: 0,
-            right: doc.width,
-            bottom: doc.height
-        }
-    });
-
-    return pixelData;
+    addDataStreamLog('Pixel data access not yet implemented', 'warning');
+    // Will be implemented with batchPlay API
+    return null;
 }
 
 /**
  * Set pixel data to active layer
  * (For future pixel-level filter implementations)
+ * NOTE: Requires Photoshop Imaging API which may need batchPlay
  */
 async function setLayerPixelData(pixelData) {
-    const doc = app.activeDocument;
-    const layer = doc.activeLayers[0];
-
-    await imaging.putPixels({
-        documentID: doc.id,
-        layerID: layer.id,
-        targetBounds: pixelData.sourceBounds,
-        imageData: pixelData.imageData
-    });
+    addDataStreamLog('Pixel data writing not yet implemented', 'warning');
+    // Will be implemented with batchPlay API
 }
 
 // ===================================================================

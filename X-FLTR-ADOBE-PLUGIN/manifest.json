@@ -6,7 +6,7 @@
   "host": [
     {
       "app": "PS",
-      "minVersion": "26.0.0"
+      "minVersion": "27.3.1"
     }
   ],
   "entrypoints": [
@@ -15,92 +15,7 @@
       "id": "xfltr.panel",
       "label": {
         "default": "X-FLTR"
-      },
-      "minimumSize": {
-        "width": 400,
-        "height": 600
-      },
-      "maximumSize": {
-        "width": 800,
-        "height": 1200
-      },
-      "preferredDockedSize": {
-        "width": 450,
-        "height": 800
-      },
-      "preferredFloatingSize": {
-        "width": 500,
-        "height": 900
-      },
-      "icons": [
-        {
-          "width": 23,
-          "height": 23,
-          "path": "icons/icon-dark.png",
-          "scale": [
-            1,
-            2
-          ],
-          "theme": [
-            "dark",
-            "darkest"
-          ]
-        },
-        {
-          "width": 23,
-          "height": 23,
-          "path": "icons/icon-light.png",
-          "scale": [
-            1,
-            2
-          ],
-          "theme": [
-            "light",
-            "lightest"
-          ]
-        }
-      ]
-    }
-  ],
-  "requiredPermissions": [
-    {
-      "name": "enablePluginWrite"
-    },
-    {
-      "name": "clipboard"
-    },
-    {
-      "name": "network",
-      "domains": []
-    }
-  ],
-  "icons": [
-    {
-      "width": 48,
-      "height": 48,
-      "path": "icons/icon-dark.png",
-      "scale": [
-        1,
-        2
-      ],
-      "theme": [
-        "dark",
-        "darkest",
-        "medium"
-      ]
-    },
-    {
-      "width": 48,
-      "height": 48,
-      "path": "icons/icon-light.png",
-      "scale": [
-        1,
-        2
-      ],
-      "theme": [
-        "lightest",
-        "light"
-      ]
+      }
     }
   ]
 }
