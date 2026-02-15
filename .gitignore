@@ -1,0 +1,75 @@
+# X-FLTR / THE VOID ENGINE — .gitignore
+# Python & Virtual Environment
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# IDE / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Archive folder (old versions - optional)
+# Uncomment if you don't want to track old versions
+# archive/
+
+# User-generated exports (optional)
+# Uncomment if you don't want to track exported images
+# exports/
+# *.png
+# *.jpg
+# *.jpeg
+# *.tiff
+
+# Claude Code project files (optional)
+# .claude/
+
+# Documentation drafts (optional)
+# *.draft.md
