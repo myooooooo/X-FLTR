@@ -5,7 +5,10 @@
       "Bash(source:*)",
       "Bash(pip install:*)",
       "Bash(ls:*)",
-      "Bash(python main.py:*)"
+      "Bash(python main.py:*)",
+      "Bash(git mv:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
