@@ -1,12 +1,12 @@
 {
   "id": "com.anssafouzineb.xfltr",
   "name": "X-FLTR / THE VOID ENGINE",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "manifestVersion": 5,
   "host": [
     {
       "app": "PS",
-      "minVersion": "27.3.1"
+      "minVersion": "23.0.0"
     }
   ],
   "entrypoints": [
@@ -15,7 +15,24 @@
       "id": "xfltr.panel",
       "label": {
         "default": "X-FLTR"
-      }
+      },
+      "minimumSize": {
+        "width": 300,
+        "height": 500
+      },
+      "maximumSize": {
+        "width": 800,
+        "height": 1000
+      },
+      "main": "index.html"
     }
-  ]
+  ],
+  "requiredPermissions": {
+    "localFileSystem": "request",
+    "network": {
+      "domains": [
+        "http://localhost:8000"
+      ]
+    }
+  }
 }
