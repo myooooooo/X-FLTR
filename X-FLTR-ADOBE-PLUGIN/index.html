@@ -279,6 +279,40 @@
                     redLayer.blendMode = "lighten";
                     blueLayer.blendMode = "lighten";
 
+                    // GROUP LAYERS: Create folder and organize
+                    const { action } = require('photoshop');
+
+                    // Select the two new layers
+                    await action.batchPlay([{
+                        "_obj": "select",
+                        "_target": [{ "_ref": "layer", "_name": "Blue Shift" }],
+                        "makeVisible": false
+                    }], {});
+
+                    await action.batchPlay([{
+                        "_obj": "select",
+                        "_target": [{ "_ref": "layer", "_name": "Red Shift" }],
+                        "selectionModifier": { "_enum": "selectionModifierType", "_value": "addToSelection" },
+                        "makeVisible": false
+                    }], {});
+
+                    // Group selected layers
+                    await action.batchPlay([{
+                        "_obj": "make",
+                        "_target": [{ "_ref": "layerSection" }],
+                        "from": { "_ref": "layer", "_enum": "ordinal", "_value": "targetEnum" }
+                    }], {});
+
+                    // Rename the group
+                    await action.batchPlay([{
+                        "_obj": "set",
+                        "_target": [{ "_ref": "layer", "_enum": "ordinal", "_value": "targetEnum" }],
+                        "to": {
+                            "_obj": "layer",
+                            "name": "RGB Split Effect"
+                        }
+                    }], {});
+
                 }, { commandName: 'RGB Split Linear' });
 
                 updateStatus('SUCCESS: RGB SPLIT APPLIED', '#00FF41');
@@ -322,6 +356,47 @@
                     redLayer.blendMode = "lighten";
                     greenLayer.blendMode = "lighten";
                     blueLayer.blendMode = "lighten";
+
+                    // GROUP LAYERS: Create folder and organize
+                    const { action } = require('photoshop');
+
+                    // Select the three new layers
+                    await action.batchPlay([{
+                        "_obj": "select",
+                        "_target": [{ "_ref": "layer", "_name": "Blue Wave" }],
+                        "makeVisible": false
+                    }], {});
+
+                    await action.batchPlay([{
+                        "_obj": "select",
+                        "_target": [{ "_ref": "layer", "_name": "Green Wave" }],
+                        "selectionModifier": { "_enum": "selectionModifierType", "_value": "addToSelection" },
+                        "makeVisible": false
+                    }], {});
+
+                    await action.batchPlay([{
+                        "_obj": "select",
+                        "_target": [{ "_ref": "layer", "_name": "Red Wave" }],
+                        "selectionModifier": { "_enum": "selectionModifierType", "_value": "addToSelection" },
+                        "makeVisible": false
+                    }], {});
+
+                    // Group selected layers
+                    await action.batchPlay([{
+                        "_obj": "make",
+                        "_target": [{ "_ref": "layerSection" }],
+                        "from": { "_ref": "layer", "_enum": "ordinal", "_value": "targetEnum" }
+                    }], {});
+
+                    // Rename the group
+                    await action.batchPlay([{
+                        "_obj": "set",
+                        "_target": [{ "_ref": "layer", "_enum": "ordinal", "_value": "targetEnum" }],
+                        "to": {
+                            "_obj": "layer",
+                            "name": "RGB Wave Effect"
+                        }
+                    }], {});
 
                 }, { commandName: 'RGB Split Wave' });
 
@@ -1597,6 +1672,40 @@
                     // Set blend mode to Screen with 20% opacity
                     noiseLayer.blendMode = "screen";
                     noiseLayer.opacity = 20;
+
+                    // GROUP LAYERS: Create folder and organize
+                    ghostLayer.name = "Ghost Layer";
+
+                    // Select the two new layers
+                    await action.batchPlay([{
+                        "_obj": "select",
+                        "_target": [{ "_ref": "layer", "_name": "Ghost Layer" }],
+                        "makeVisible": false
+                    }], {});
+
+                    await action.batchPlay([{
+                        "_obj": "select",
+                        "_target": [{ "_ref": "layer", "_name": "White Noise" }],
+                        "selectionModifier": { "_enum": "selectionModifierType", "_value": "addToSelection" },
+                        "makeVisible": false
+                    }], {});
+
+                    // Group selected layers
+                    await action.batchPlay([{
+                        "_obj": "make",
+                        "_target": [{ "_ref": "layerSection" }],
+                        "from": { "_ref": "layer", "_enum": "ordinal", "_value": "targetEnum" }
+                    }], {});
+
+                    // Rename the group
+                    await action.batchPlay([{
+                        "_obj": "set",
+                        "_target": [{ "_ref": "layer", "_enum": "ordinal", "_value": "targetEnum" }],
+                        "to": {
+                            "_obj": "layer",
+                            "name": "Ghost Noise Effect"
+                        }
+                    }], {});
 
                 }, { commandName: 'Ghost Noise' });
 
