@@ -86,6 +86,16 @@
         <button id="btn-mosaic">Mosaic</button>
         <button id="btn-pixelate">Pixelate</button>
         <button id="btn-radial-blur">Radial Blur</button>
+
+        <h3 style="color: #00FF41; margin: 16px 0 8px 0;">RETRO-TECH (8)</h3>
+        <button id="btn-gameboy">GameBoy 4-Color</button>
+        <button id="btn-c64">Commodore 64</button>
+        <button id="btn-cga">CGA 4-Color</button>
+        <button id="btn-sepia">Sepia Tone</button>
+        <button id="btn-grayscale">Grayscale</button>
+        <button id="btn-threshold">Threshold B&W</button>
+        <button id="btn-duotone">Duotone</button>
+        <button id="btn-vintage">Vintage Film</button>
     </div>
 
     <script>
@@ -532,6 +542,267 @@
             }
         }
 
+        // RETRO-TECH FILTERS
+        async function gameBoy() {
+            try {
+                updateStatus('APPLYING GAMEBOY PALETTE...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Convert to grayscale first
+                    await action.batchPlay([{
+                        "_obj": "desaturate"
+                    }], {});
+
+                    // Apply posterization to 4 levels (GameBoy has 4 shades of green)
+                    await action.batchPlay([{
+                        "_obj": "posterization",
+                        "levels": 4
+                    }], {});
+
+                    // Apply green color overlay
+                    await action.batchPlay([{
+                        "_obj": "hueSaturation",
+                        "colorize": true,
+                        "hue": 90,
+                        "saturation": 40,
+                        "lightness": 0
+                    }], {});
+
+                }, { commandName: 'GameBoy Palette' });
+
+                updateStatus('SUCCESS: GAMEBOY PALETTE APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function commodore64() {
+            try {
+                updateStatus('APPLYING C64 PALETTE...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Reduce to 16 colors (C64 palette)
+                    await action.batchPlay([{
+                        "_obj": "posterization",
+                        "levels": 16
+                    }], {});
+
+                    // Increase saturation for retro look
+                    await action.batchPlay([{
+                        "_obj": "hueSaturation",
+                        "saturation": 25
+                    }], {});
+
+                }, { commandName: 'Commodore 64' });
+
+                updateStatus('SUCCESS: C64 PALETTE APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function cgaPalette() {
+            try {
+                updateStatus('APPLYING CGA PALETTE...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // CGA has 4 colors - extreme posterization
+                    await action.batchPlay([{
+                        "_obj": "posterization",
+                        "levels": 4
+                    }], {});
+
+                    // Boost saturation for CGA look
+                    await action.batchPlay([{
+                        "_obj": "hueSaturation",
+                        "saturation": 50
+                    }], {});
+
+                }, { commandName: 'CGA Palette' });
+
+                updateStatus('SUCCESS: CGA PALETTE APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function sepiaTone() {
+            try {
+                updateStatus('APPLYING SEPIA TONE...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Desaturate first
+                    await action.batchPlay([{
+                        "_obj": "desaturate"
+                    }], {});
+
+                    // Apply sepia color (brownish)
+                    await action.batchPlay([{
+                        "_obj": "hueSaturation",
+                        "colorize": true,
+                        "hue": 30,
+                        "saturation": 25,
+                        "lightness": 0
+                    }], {});
+
+                }, { commandName: 'Sepia Tone' });
+
+                updateStatus('SUCCESS: SEPIA APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function grayscale() {
+            try {
+                updateStatus('CONVERTING TO GRAYSCALE...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "desaturate"
+                    }], {});
+                }, { commandName: 'Grayscale' });
+
+                updateStatus('SUCCESS: GRAYSCALE APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function thresholdBW() {
+            try {
+                updateStatus('APPLYING THRESHOLD...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Convert to pure black and white
+                    await action.batchPlay([{
+                        "_obj": "thresholdClassEvent",
+                        "level": 128
+                    }], {});
+
+                }, { commandName: 'Threshold B&W' });
+
+                updateStatus('SUCCESS: THRESHOLD APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function duotone() {
+            try {
+                updateStatus('APPLYING DUOTONE...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Desaturate
+                    await action.batchPlay([{
+                        "_obj": "desaturate"
+                    }], {});
+
+                    // Apply cyan/magenta duotone
+                    await action.batchPlay([{
+                        "_obj": "hueSaturation",
+                        "colorize": true,
+                        "hue": 200,
+                        "saturation": 50,
+                        "lightness": 0
+                    }], {});
+
+                }, { commandName: 'Duotone' });
+
+                updateStatus('SUCCESS: DUOTONE APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function vintageFilm() {
+            try {
+                updateStatus('APPLYING VINTAGE FILM...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Reduce saturation
+                    await action.batchPlay([{
+                        "_obj": "hueSaturation",
+                        "saturation": -20
+                    }], {});
+
+                    // Add warm tint
+                    await action.batchPlay([{
+                        "_obj": "curves",
+                        "adjustment": [{
+                            "_obj": "curvesAdjustment",
+                            "channel": { "_ref": "channel", "_enum": "channel", "_value": "blue" },
+                            "curve": [
+                                { "horizontal": 0, "vertical": 10 },
+                                { "horizontal": 128, "vertical": 128 },
+                                { "horizontal": 255, "vertical": 245 }
+                            ]
+                        }]
+                    }], {});
+
+                    // Add slight grain effect with noise
+                    await action.batchPlay([{
+                        "_obj": "addNoise",
+                        "noise": { "_unit": "percentUnit", "_value": 3 },
+                        "distribution": { "_enum": "distribution", "_value": "gaussian" },
+                        "monochromatic": false
+                    }], {});
+
+                }, { commandName: 'Vintage Film' });
+
+                updateStatus('SUCCESS: VINTAGE FILM APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
         // Attach event listeners - GLITCH
         document.getElementById('btn-rgb-linear').addEventListener('click', rgbSplitLinear);
         document.getElementById('btn-rgb-wave').addEventListener('click', rgbSplitWave);
@@ -552,8 +823,18 @@
         document.getElementById('btn-pixelate').addEventListener('click', pixelate);
         document.getElementById('btn-radial-blur').addEventListener('click', radialBlur);
 
+        // Attach event listeners - RETRO-TECH
+        document.getElementById('btn-gameboy').addEventListener('click', gameBoy);
+        document.getElementById('btn-c64').addEventListener('click', commodore64);
+        document.getElementById('btn-cga').addEventListener('click', cgaPalette);
+        document.getElementById('btn-sepia').addEventListener('click', sepiaTone);
+        document.getElementById('btn-grayscale').addEventListener('click', grayscale);
+        document.getElementById('btn-threshold').addEventListener('click', thresholdBW);
+        document.getElementById('btn-duotone').addEventListener('click', duotone);
+        document.getElementById('btn-vintage').addEventListener('click', vintageFilm);
+
         // Initialize
-        updateStatus('READY - 16 FILTERS LOADED (8 GLITCH + 8 EXPERIMENTAL)', '#00CCFF');
+        updateStatus('READY - 24 FILTERS LOADED (8 GLITCH + 8 EXPERIMENTAL + 8 RETRO-TECH)', '#00CCFF');
     </script>
 </body>
 </html>
