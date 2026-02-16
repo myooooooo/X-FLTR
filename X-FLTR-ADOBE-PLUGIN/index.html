@@ -157,13 +157,18 @@
             </sp-slider>
         </div>
 
-        <sp-button
-            id="btn-render-engine"
-            variant="cta"
-            class="render-btn"
-            style="width: 100%;">
-            ⚡ RENDER ENGINE ⚡
-        </sp-button>
+        <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #00FF41;">
+            <div style="color: #00CCFF; font-size: 10px; text-align: center; margin-bottom: 8px;">
+                ⚡ LIVE PREVIEW MODE ⚡
+            </div>
+            <sp-button
+                id="btn-reset-engine"
+                variant="secondary"
+                class="render-btn"
+                style="width: 100%;">
+                ↻ RESET PREVIEW
+            </sp-button>
+        </div>
     </div>
 
     <div id="filters">
@@ -1002,24 +1007,77 @@
         // PARAMETRIC ENGINE: THE DOT MATRIX ENGINE
         // ═══════════════════════════════════════════════════════════
 
+        // Global state for non-destructive preview system
+        let engineState = {
+            originalLayer: null,
+            previewLayer: null,
+            isProcessing: false
+        };
+
+        // Debounce function to prevent UXP crash from excessive batchPlay calls
+        function debounce(func, delay) {
+            let timeoutId;
+            return function(...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
         async function renderDotMatrixEngine() {
             try {
-                updateStatus('⚡ RENDERING DOT MATRIX ENGINE...', '#FF9900');
-
-                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
-                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                // Prevent concurrent executions (anti-crash protection)
+                if (engineState.isProcessing) {
                     return;
                 }
+
+                if (!app.activeDocument) {
+                    updateStatus('ERROR: NO DOCUMENT OPEN', '#FF0000');
+                    return;
+                }
+
+                engineState.isProcessing = true;
 
                 // Retrieve dynamic parameter values from sliders
                 const scaleValue = parseInt(document.getElementById('slider-scale').value);
                 const densityValue = parseInt(document.getElementById('slider-density').value);
                 const distortionValue = parseInt(document.getElementById('slider-distortion').value);
 
-                updateStatus(`⚡ PARAMS: SCALE=${scaleValue} | DENSITY=${densityValue} | JITTER=${distortionValue}`, '#00CCFF');
+                updateStatus(`⚡ LIVE: SCALE=${scaleValue} | DENSITY=${densityValue} | JITTER=${distortionValue}`, '#00CCFF');
 
                 await executeAsModal(async () => {
                     const { action } = require('photoshop');
+                    const doc = app.activeDocument;
+
+                    // STEP 0: Non-destructive preview system
+                    // Store original layer reference on first run
+                    if (!engineState.originalLayer) {
+                        if (!doc.activeLayers || doc.activeLayers.length === 0) {
+                            updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                            engineState.isProcessing = false;
+                            return;
+                        }
+                        engineState.originalLayer = doc.activeLayers[0];
+                    }
+
+                    // Delete old preview layer if exists
+                    if (engineState.previewLayer) {
+                        try {
+                            await engineState.previewLayer.delete();
+                        } catch (e) {
+                            // Preview layer may have been deleted manually
+                            engineState.previewLayer = null;
+                        }
+                    }
+
+                    // Create fresh preview layer from original
+                    engineState.previewLayer = await engineState.originalLayer.duplicate();
+                    engineState.previewLayer.name = "[PREVIEW] Dot Matrix";
+
+                    // Make sure we're working on the preview layer
+                    await action.batchPlay([{
+                        "_obj": "select",
+                        "_target": [{ "_ref": "layer", "_name": engineState.previewLayer.name }]
+                    }], {});
 
                     // STEP 1: Convert to grayscale for dot matrix base
                     await action.batchPlay([{
@@ -1039,7 +1097,6 @@
                     }], {});
 
                     // STEP 4: Apply distortion/jitter with dynamic DISTORTION parameter
-                    // Using Ripple for organic jitter effect
                     if (distortionValue > 0) {
                         await action.batchPlay([{
                             "_obj": "ripple",
@@ -1056,39 +1113,63 @@
                         "shape": { "_enum": "halftonePattern", "_value": "round" }
                     }], {});
 
-                }, { commandName: 'Dot Matrix Engine' });
+                }, { commandName: 'Dot Matrix Live Preview' });
 
-                updateStatus('✓ SUCCESS: DOT MATRIX ENGINE RENDERED', '#00FF41');
+                updateStatus('✓ LIVE PREVIEW ACTIVE', '#00FF41');
 
             } catch (error) {
                 updateStatus('ERROR: ' + error.message, '#FF0000');
                 console.error('Dot Matrix Engine Error:', error);
+            } finally {
+                engineState.isProcessing = false;
             }
         }
 
+        // Debounced version for live preview (300ms delay for safety)
+        const debouncedRender = debounce(renderDotMatrixEngine, 300);
+
         // ═══════════════════════════════════════════════════════════
-        // EVENT LISTENERS - PARAMETRIC ENGINE
+        // EVENT LISTENERS - PARAMETRIC ENGINE (LIVE PREVIEW)
         // ═══════════════════════════════════════════════════════════
 
-        // Real-time slider value updates
         const sliderScale = document.getElementById('slider-scale');
         const sliderDensity = document.getElementById('slider-density');
         const sliderDistortion = document.getElementById('slider-distortion');
 
+        // LIVE PREVIEW: Update values + trigger debounced render on slider change
         sliderScale.addEventListener('input', (e) => {
             document.getElementById('value-scale').textContent = e.target.value;
+            debouncedRender(); // Trigger live preview with anti-crash debounce
         });
 
         sliderDensity.addEventListener('input', (e) => {
             document.getElementById('value-density').textContent = e.target.value;
+            debouncedRender(); // Trigger live preview with anti-crash debounce
         });
 
         sliderDistortion.addEventListener('input', (e) => {
             document.getElementById('value-distortion').textContent = e.target.value;
+            debouncedRender(); // Trigger live preview with anti-crash debounce
         });
 
-        // Render button
-        document.getElementById('btn-render-engine').addEventListener('click', renderDotMatrixEngine);
+        // Reset button: Clear preview layer and reset state
+        const btnReset = document.getElementById('btn-reset-engine');
+        if (btnReset) {
+            btnReset.addEventListener('click', async () => {
+                try {
+                    if (engineState.previewLayer) {
+                        await executeAsModal(async () => {
+                            await engineState.previewLayer.delete();
+                        }, { commandName: 'Reset Preview' });
+                    }
+                    engineState.originalLayer = null;
+                    engineState.previewLayer = null;
+                    updateStatus('✓ PREVIEW RESET', '#00FF41');
+                } catch (error) {
+                    updateStatus('ERROR: ' + error.message, '#FF0000');
+                }
+            });
+        }
 
         // ═══════════════════════════════════════════════════════════
         // EVENT LISTENERS - STATIC FILTERS
