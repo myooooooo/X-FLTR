@@ -228,6 +228,31 @@
         <button id="btn-duotone">Duotone</button>
         <button id="btn-vintage">Vintage Film</button>
         <button id="btn-y2k-halftone">Y2K Halftone Crush</button>
+
+        <h3 style="color: #00FF41; margin: 16px 0 8px 0;">DATA-BENDING (3)</h3>
+        <button id="btn-chroma-bleed">Chroma Bleed</button>
+        <button id="btn-pixel-sort">Pixel Sort</button>
+        <button id="btn-vcr-tracking">VCR Tracking</button>
+
+        <h3 style="color: #00FF41; margin: 16px 0 8px 0;">SPECTRAL (3)</h3>
+        <button id="btn-flir-thermal">FLIR Thermal</button>
+        <button id="btn-sonar-radar">Sonar Radar</button>
+        <button id="btn-ferrofluid">Ferrofluid</button>
+
+        <h3 style="color: #00FF41; margin: 16px 0 8px 0;">OPTICAL (3)</h3>
+        <button id="btn-anamorphic-flare">Anamorphic Flare</button>
+        <button id="btn-prism-shift">Prism Shift</button>
+        <button id="btn-retinal-burn">Retinal Burn</button>
+
+        <h3 style="color: #00FF41; margin: 16px 0 8px 0;">LO-FI (3)</h3>
+        <button id="btn-xerox-gen10">Xerox Gen 10</button>
+        <button id="btn-microfiche">Microfiche</button>
+        <button id="btn-gameboy-dither">GameBoy Dither</button>
+
+        <h3 style="color: #00FF41; margin: 16px 0 8px 0;">GHOST ENGINES (3)</h3>
+        <button id="btn-cctv-night">CCTV Night</button>
+        <button id="btn-ghost-noise">Ghost Noise</button>
+        <button id="btn-typographic">Typographic</button>
     </div>
 
     <script>
@@ -1318,6 +1343,733 @@
         }
 
         // ═══════════════════════════════════════════════════════════
+        // EXPANSION: 15 EXTREME FILTERS (THE VOID ENGINE)
+        // ═══════════════════════════════════════════════════════════
+
+        // ────────────────────────────────────────────────────────────
+        // DATA-BENDING CATEGORY (3 filters)
+        // ────────────────────────────────────────────────────────────
+
+        async function applyChromaBleed() {
+            try {
+                updateStatus('⚡ APPLYING CHROMA BLEED...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    const doc = app.activeDocument;
+                    const originalLayer = doc.activeLayers[0];
+
+                    // Duplicate layer for manipulation
+                    const workLayer = await originalLayer.duplicate();
+
+                    // Target Red channel: Apply Gaussian Blur 15px
+                    await action.batchPlay([{
+                        "_obj": "gaussianBlur",
+                        "radius": { "_unit": "pixelsUnit", "_value": 15 },
+                        "channels": [{ "_ref": "channel", "_enum": "channel", "_value": "red" }]
+                    }], {});
+
+                    // Target Blue channel: Apply Mosaic 10px
+                    await action.batchPlay([{
+                        "_obj": "mosaic",
+                        "cellSize": { "_unit": "pixelsUnit", "_value": 10 },
+                        "channels": [{ "_ref": "channel", "_enum": "channel", "_value": "blue" }]
+                    }], {});
+
+                }, { commandName: 'Chroma Bleed' });
+
+                updateStatus('✓ CHROMA BLEED APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function applyPixelSort() {
+            try {
+                updateStatus('⚡ APPLYING PIXEL SORT...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    const doc = app.activeDocument;
+
+                    // Select highlights (luminosity mask simulation via threshold)
+                    await action.batchPlay([{
+                        "_obj": "make",
+                        "_target": [{ "_ref": "channel", "_property": "selection" }],
+                        "from": { "_ref": "channel", "_enum": "channel", "_value": "RGB" },
+                        "colorRange": {
+                            "_obj": "colorRange",
+                            "colorModel": 0,
+                            "fuzziness": 40
+                        }
+                    }], {});
+
+                    // Copy selection to new layer
+                    await action.batchPlay([{
+                        "_obj": "copyToLayer"
+                    }], {});
+
+                    // Rotate 90° counter-clockwise
+                    await action.batchPlay([{
+                        "_obj": "rotate",
+                        "angle": { "_unit": "angleUnit", "_value": -90 }
+                    }], {});
+
+                    // Apply Wind filter twice
+                    for (let i = 0; i < 2; i++) {
+                        await action.batchPlay([{
+                            "_obj": "wind",
+                            "method": { "_enum": "windMethod", "_value": "wind" },
+                            "direction": { "_enum": "windDirection", "_value": "fromTheRight" }
+                        }], {});
+                    }
+
+                    // Rotate 90° clockwise back
+                    await action.batchPlay([{
+                        "_obj": "rotate",
+                        "angle": { "_unit": "angleUnit", "_value": 90 }
+                    }], {});
+
+                    // Set blend mode to Screen
+                    const currentLayer = doc.activeLayers[0];
+                    currentLayer.blendMode = "screen";
+
+                }, { commandName: 'Pixel Sort' });
+
+                updateStatus('✓ PIXEL SORT APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function applyVCR() {
+            try {
+                updateStatus('⚡ APPLYING VCR TRACKING...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Add monochromatic noise 50%
+                    await action.batchPlay([{
+                        "_obj": "addNoise",
+                        "noise": { "_unit": "percentUnit", "_value": 50 },
+                        "distribution": { "_enum": "distribution", "_value": "gaussian" },
+                        "monochromatic": true
+                    }], {});
+
+                    // Apply Wave filter (square type, low amplitude, long wavelength for VCR tracking)
+                    await action.batchPlay([{
+                        "_obj": "wave",
+                        "numberOfGenerators": 1,
+                        "minimumWavelength": { "_unit": "pixelsUnit", "_value": 100 },
+                        "maximumWavelength": { "_unit": "pixelsUnit", "_value": 200 },
+                        "minimumAmplitude": { "_unit": "pixelsUnit", "_value": 2 },
+                        "maximumAmplitude": { "_unit": "pixelsUnit", "_value": 5 },
+                        "horizontalScale": { "_unit": "percentUnit", "_value": 100 },
+                        "verticalScale": { "_unit": "percentUnit", "_value": 100 },
+                        "waveType": { "_enum": "waveType", "_value": "square" },
+                        "undefinedAreas": { "_enum": "undefinedAreas", "_value": "repeatEdgePixels" }
+                    }], {});
+
+                }, { commandName: 'VCR Tracking' });
+
+                updateStatus('✓ VCR TRACKING APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        // ────────────────────────────────────────────────────────────
+        // SPECTRAL CATEGORY (3 filters)
+        // ────────────────────────────────────────────────────────────
+
+        async function applyFLIR() {
+            try {
+                updateStatus('⚡ APPLYING FLIR THERMAL...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Convert to grayscale
+                    await action.batchPlay([{
+                        "_obj": "desaturate"
+                    }], {});
+
+                    // Apply thermal gradient map: Black -> Dark Blue -> Magenta -> Red -> Yellow -> White
+                    await action.batchPlay([{
+                        "_obj": "gradientMap",
+                        "gradientMap": {
+                            "_obj": "gradientClassEvent",
+                            "name": "FLIR Thermal",
+                            "gradientForm": { "_enum": "gradientForm", "_value": "customStops" },
+                            "interfaceIconFrameDimmed": 4096,
+                            "colors": [
+                                { "_obj": "colorStop", "location": 0, "color": { "_obj": "RGBColor", "red": 0, "grain": 0, "blue": 0 } },
+                                { "_obj": "colorStop", "location": 820, "color": { "_obj": "RGBColor", "red": 0, "grain": 0, "blue": 100 } },
+                                { "_obj": "colorStop", "location": 1640, "color": { "_obj": "RGBColor", "red": 200, "grain": 0, "blue": 200 } },
+                                { "_obj": "colorStop", "location": 2460, "color": { "_obj": "RGBColor", "red": 255, "grain": 0, "blue": 0 } },
+                                { "_obj": "colorStop", "location": 3280, "color": { "_obj": "RGBColor", "red": 255, "grain": 255, "blue": 0 } },
+                                { "_obj": "colorStop", "location": 4096, "color": { "_obj": "RGBColor", "red": 255, "grain": 255, "blue": 255 } }
+                            ],
+                            "transparency": [
+                                { "_obj": "transparencyStop", "location": 0, "opacity": { "_unit": "percentUnit", "_value": 100 } },
+                                { "_obj": "transparencyStop", "location": 4096, "opacity": { "_unit": "percentUnit", "_value": 100 } }
+                            ]
+                        }
+                    }], {});
+
+                }, { commandName: 'FLIR Thermal' });
+
+                updateStatus('✓ FLIR THERMAL APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function applySonar() {
+            try {
+                updateStatus('⚡ APPLYING SONAR RADAR...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Find Edges
+                    await action.batchPlay([{
+                        "_obj": "findEdges"
+                    }], {});
+
+                    // Invert
+                    await action.batchPlay([{
+                        "_obj": "invert"
+                    }], {});
+
+                    // Colorize: Hue 120 (Neon Green), Saturation 100
+                    await action.batchPlay([{
+                        "_obj": "hueSaturation",
+                        "colorize": true,
+                        "hue": 120,
+                        "saturation": 100,
+                        "lightness": 0
+                    }], {});
+
+                }, { commandName: 'Sonar Radar' });
+
+                updateStatus('✓ SONAR RADAR APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function applyFerrofluid() {
+            try {
+                updateStatus('⚡ APPLYING FERROFLUID...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Max contrast
+                    await action.batchPlay([{
+                        "_obj": "brightnessEvent",
+                        "brightness": 0,
+                        "contrast": 100
+                    }], {});
+
+                    // Invert Blue channel only
+                    await action.batchPlay([{
+                        "_obj": "invert",
+                        "channels": [{ "_ref": "channel", "_enum": "channel", "_value": "blue" }]
+                    }], {});
+
+                    // Plastic Wrap for liquid texture
+                    await action.batchPlay([{
+                        "_obj": "plasticWrap",
+                        "highlightStrength": 15,
+                        "detail": 9,
+                        "smoothness": 7
+                    }], {});
+
+                }, { commandName: 'Ferrofluid' });
+
+                updateStatus('✓ FERROFLUID APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        // ────────────────────────────────────────────────────────────
+        // OPTICAL CATEGORY (3 filters)
+        // ────────────────────────────────────────────────────────────
+
+        async function applyAnamorphic() {
+            try {
+                updateStatus('⚡ APPLYING ANAMORPHIC FLARE...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    const doc = app.activeDocument;
+                    const originalLayer = doc.activeLayers[0];
+
+                    // Duplicate layer
+                    const flareLayer = await originalLayer.duplicate();
+
+                    // Threshold to keep only whites
+                    await action.batchPlay([{
+                        "_obj": "thresholdClassEvent",
+                        "level": 200
+                    }], {});
+
+                    // Motion Blur horizontal (angle 0°, distance max)
+                    await action.batchPlay([{
+                        "_obj": "motionBlur",
+                        "angle": { "_unit": "angleUnit", "_value": 0 },
+                        "distance": { "_unit": "pixelsUnit", "_value": 100 }
+                    }], {});
+
+                    // Colorize cyan
+                    await action.batchPlay([{
+                        "_obj": "hueSaturation",
+                        "colorize": true,
+                        "hue": 180,
+                        "saturation": 100,
+                        "lightness": 0
+                    }], {});
+
+                    // Set blend mode to Screen
+                    flareLayer.blendMode = "screen";
+
+                }, { commandName: 'Anamorphic Flare' });
+
+                updateStatus('✓ ANAMORPHIC FLARE APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function applyPrismShift() {
+            try {
+                updateStatus('⚡ APPLYING PRISM SHIFT...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    const doc = app.activeDocument;
+                    const originalLayer = doc.activeLayers[0];
+
+                    // Duplicate layer
+                    await originalLayer.duplicate();
+
+                    // Red channel: Radial Blur (Zoom) 2%
+                    await action.batchPlay([{
+                        "_obj": "radialBlur",
+                        "amount": 2,
+                        "blurMethod": { "_enum": "radialBlurMethod", "_value": "zoom" },
+                        "blurQuality": { "_enum": "radialBlurQuality", "_value": "good" },
+                        "channels": [{ "_ref": "channel", "_enum": "channel", "_value": "red" }]
+                    }], {});
+
+                    // Blue channel: Radial Blur (Zoom) 4%
+                    await action.batchPlay([{
+                        "_obj": "radialBlur",
+                        "amount": 4,
+                        "blurMethod": { "_enum": "radialBlurMethod", "_value": "zoom" },
+                        "blurQuality": { "_enum": "radialBlurQuality", "_value": "good" },
+                        "channels": [{ "_ref": "channel", "_enum": "channel", "_value": "blue" }]
+                    }], {});
+
+                }, { commandName: 'Prism Shift' });
+
+                updateStatus('✓ PRISM SHIFT APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function applyRetinalBurn() {
+            try {
+                updateStatus('⚡ APPLYING RETINAL BURN...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Curves W-shape for solarization effect
+                    await action.batchPlay([{
+                        "_obj": "curves",
+                        "adjustment": [{
+                            "_obj": "curvesAdjustment",
+                            "channel": { "_ref": "channel", "_enum": "channel", "_value": "composite" },
+                            "curve": [
+                                { "horizontal": 0, "vertical": 0 },
+                                { "horizontal": 64, "vertical": 192 },
+                                { "horizontal": 128, "vertical": 64 },
+                                { "horizontal": 192, "vertical": 192 },
+                                { "horizontal": 255, "vertical": 255 }
+                            ]
+                        }]
+                    }], {});
+
+                    // Unsharp Mask extreme (500%, radius 2px)
+                    await action.batchPlay([{
+                        "_obj": "unsharpMask",
+                        "amount": { "_unit": "percentUnit", "_value": 500 },
+                        "radius": { "_unit": "pixelsUnit", "_value": 2 },
+                        "threshold": 0
+                    }], {});
+
+                }, { commandName: 'Retinal Burn' });
+
+                updateStatus('✓ RETINAL BURN APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        // ────────────────────────────────────────────────────────────
+        // LO-FI CATEGORY (3 filters)
+        // ────────────────────────────────────────────────────────────
+
+        async function applyXerox() {
+            try {
+                updateStatus('⚡ APPLYING XEROX GEN 10...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Convert to grayscale
+                    await action.batchPlay([{
+                        "_obj": "desaturate"
+                    }], {});
+
+                    // Threshold 128
+                    await action.batchPlay([{
+                        "_obj": "thresholdClassEvent",
+                        "level": 128
+                    }], {});
+
+                    // Add noise 10%
+                    await action.batchPlay([{
+                        "_obj": "addNoise",
+                        "noise": { "_unit": "percentUnit", "_value": 10 },
+                        "distribution": { "_enum": "distribution", "_value": "gaussian" },
+                        "monochromatic": true
+                    }], {});
+
+                    // Gaussian Blur 1px
+                    await action.batchPlay([{
+                        "_obj": "gaussianBlur",
+                        "radius": { "_unit": "pixelsUnit", "_value": 1 }
+                    }], {});
+
+                    // Threshold again 128
+                    await action.batchPlay([{
+                        "_obj": "thresholdClassEvent",
+                        "level": 128
+                    }], {});
+
+                }, { commandName: 'Xerox Gen 10' });
+
+                updateStatus('✓ XEROX GEN 10 APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function applyMicrofiche() {
+            try {
+                updateStatus('⚡ APPLYING MICROFICHE...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // High Pass filter 3px
+                    await action.batchPlay([{
+                        "_obj": "highPass",
+                        "radius": { "_unit": "pixelsUnit", "_value": 3 }
+                    }], {});
+
+                    // Invert
+                    await action.batchPlay([{
+                        "_obj": "invert"
+                    }], {});
+
+                    // Gradient Map: Navy Blue (#000033) to White
+                    await action.batchPlay([{
+                        "_obj": "gradientMap",
+                        "gradientMap": {
+                            "_obj": "gradientClassEvent",
+                            "name": "Microfiche",
+                            "gradientForm": { "_enum": "gradientForm", "_value": "customStops" },
+                            "interfaceIconFrameDimmed": 4096,
+                            "colors": [
+                                { "_obj": "colorStop", "location": 0, "color": { "_obj": "RGBColor", "red": 0, "grain": 0, "blue": 51 } },
+                                { "_obj": "colorStop", "location": 4096, "color": { "_obj": "RGBColor", "red": 255, "grain": 255, "blue": 255 } }
+                            ],
+                            "transparency": [
+                                { "_obj": "transparencyStop", "location": 0, "opacity": { "_unit": "percentUnit", "_value": 100 } },
+                                { "_obj": "transparencyStop", "location": 4096, "opacity": { "_unit": "percentUnit", "_value": 100 } }
+                            ]
+                        }
+                    }], {});
+
+                }, { commandName: 'Microfiche' });
+
+                updateStatus('✓ MICROFICHE APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function applyGameBoyDither() {
+            try {
+                updateStatus('⚡ APPLYING GAMEBOY DITHER...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Mosaic 4px
+                    await action.batchPlay([{
+                        "_obj": "mosaic",
+                        "cellSize": { "_unit": "pixelsUnit", "_value": 4 }
+                    }], {});
+
+                    // Posterize to 4 levels
+                    await action.batchPlay([{
+                        "_obj": "posterization",
+                        "levels": 4
+                    }], {});
+
+                    // Gradient Map with 4 GameBoy green shades
+                    await action.batchPlay([{
+                        "_obj": "gradientMap",
+                        "gradientMap": {
+                            "_obj": "gradientClassEvent",
+                            "name": "GameBoy Palette",
+                            "gradientForm": { "_enum": "gradientForm", "_value": "customStops" },
+                            "interfaceIconFrameDimmed": 4096,
+                            "colors": [
+                                { "_obj": "colorStop", "location": 0, "color": { "_obj": "RGBColor", "red": 15, "grain": 56, "blue": 15 } },
+                                { "_obj": "colorStop", "location": 1365, "color": { "_obj": "RGBColor", "red": 48, "grain": 98, "blue": 48 } },
+                                { "_obj": "colorStop", "location": 2730, "color": { "_obj": "RGBColor", "red": 139, "grain": 172, "blue": 15 } },
+                                { "_obj": "colorStop", "location": 4096, "color": { "_obj": "RGBColor", "red": 155, "grain": 188, "blue": 15 } }
+                            ],
+                            "transparency": [
+                                { "_obj": "transparencyStop", "location": 0, "opacity": { "_unit": "percentUnit", "_value": 100 } },
+                                { "_obj": "transparencyStop", "location": 4096, "opacity": { "_unit": "percentUnit", "_value": 100 } }
+                            ]
+                        }
+                    }], {});
+
+                }, { commandName: 'GameBoy Dither' });
+
+                updateStatus('✓ GAMEBOY DITHER APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        // ────────────────────────────────────────────────────────────
+        // GHOST ENGINES CATEGORY (3 filters)
+        // ────────────────────────────────────────────────────────────
+
+        async function applyCCTVNight() {
+            try {
+                updateStatus('⚡ APPLYING CCTV NIGHT...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    const doc = app.activeDocument;
+
+                    // Colorize military green desaturated
+                    await action.batchPlay([{
+                        "_obj": "hueSaturation",
+                        "colorize": true,
+                        "hue": 90,
+                        "saturation": 30,
+                        "lightness": -20
+                    }], {});
+
+                    // Add noise layer (create new layer filled with 50% gray)
+                    const noiseLayer = await doc.createLayer();
+                    noiseLayer.name = "CCTV Noise";
+
+                    // Fill with 50% gray
+                    await action.batchPlay([{
+                        "_obj": "fill",
+                        "using": { "_enum": "fillContents", "_value": "gray" },
+                        "opacity": { "_unit": "percentUnit", "_value": 100 }
+                    }], {});
+
+                    // Add noise 30%
+                    await action.batchPlay([{
+                        "_obj": "addNoise",
+                        "noise": { "_unit": "percentUnit", "_value": 30 },
+                        "distribution": { "_enum": "distribution", "_value": "gaussian" },
+                        "monochromatic": true
+                    }], {});
+
+                    // Set blend mode to Overlay
+                    noiseLayer.blendMode = "overlay";
+
+                }, { commandName: 'CCTV Night' });
+
+                updateStatus('✓ CCTV NIGHT APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function applyGhostNoise() {
+            try {
+                updateStatus('⚡ APPLYING GHOST NOISE...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    const doc = app.activeDocument;
+                    const originalLayer = doc.activeLayers[0];
+
+                    // Duplicate layer
+                    const ghostLayer = await originalLayer.duplicate();
+
+                    // High Pass 5px
+                    await action.batchPlay([{
+                        "_obj": "highPass",
+                        "radius": { "_unit": "pixelsUnit", "_value": 5 }
+                    }], {});
+
+                    // Invert
+                    await action.batchPlay([{
+                        "_obj": "invert"
+                    }], {});
+
+                    // Set blend mode to Linear Burn
+                    ghostLayer.blendMode = "linearBurn";
+
+                    // Create white noise layer on top
+                    const noiseLayer = await doc.createLayer();
+                    noiseLayer.name = "White Noise";
+
+                    // Fill with white
+                    await action.batchPlay([{
+                        "_obj": "fill",
+                        "using": { "_enum": "fillContents", "_value": "white" }
+                    }], {});
+
+                    // Add extreme noise
+                    await action.batchPlay([{
+                        "_obj": "addNoise",
+                        "noise": { "_unit": "percentUnit", "_value": 100 },
+                        "distribution": { "_enum": "distribution", "_value": "gaussian" },
+                        "monochromatic": true
+                    }], {});
+
+                    // Set blend mode to Screen with 20% opacity
+                    noiseLayer.blendMode = "screen";
+                    noiseLayer.opacity = 20;
+
+                }, { commandName: 'Ghost Noise' });
+
+                updateStatus('✓ GHOST NOISE APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function applyTypographic() {
+            try {
+                updateStatus('⚡ APPLYING TYPOGRAPHIC...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Mosaic 15px
+                    await action.batchPlay([{
+                        "_obj": "mosaic",
+                        "cellSize": { "_unit": "pixelsUnit", "_value": 15 }
+                    }], {});
+
+                    // Find Edges
+                    await action.batchPlay([{
+                        "_obj": "findEdges"
+                    }], {});
+
+                    // Convert to B&W
+                    await action.batchPlay([{
+                        "_obj": "desaturate"
+                    }], {});
+
+                    // Hard threshold for corrupted data look
+                    await action.batchPlay([{
+                        "_obj": "thresholdClassEvent",
+                        "level": 100
+                    }], {});
+
+                }, { commandName: 'Typographic' });
+
+                updateStatus('✓ TYPOGRAPHIC APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
         // EVENT LISTENERS - PARAMETRIC ENGINE (LIVE PREVIEW)
         // ═══════════════════════════════════════════════════════════
 
@@ -1395,8 +2147,33 @@
         document.getElementById('btn-vintage').addEventListener('click', vintageFilm);
         document.getElementById('btn-y2k-halftone').addEventListener('click', y2kHalftoneCrush);
 
+        // Attach event listeners - DATA-BENDING
+        document.getElementById('btn-chroma-bleed').addEventListener('click', applyChromaBleed);
+        document.getElementById('btn-pixel-sort').addEventListener('click', applyPixelSort);
+        document.getElementById('btn-vcr-tracking').addEventListener('click', applyVCR);
+
+        // Attach event listeners - SPECTRAL
+        document.getElementById('btn-flir-thermal').addEventListener('click', applyFLIR);
+        document.getElementById('btn-sonar-radar').addEventListener('click', applySonar);
+        document.getElementById('btn-ferrofluid').addEventListener('click', applyFerrofluid);
+
+        // Attach event listeners - OPTICAL
+        document.getElementById('btn-anamorphic-flare').addEventListener('click', applyAnamorphic);
+        document.getElementById('btn-prism-shift').addEventListener('click', applyPrismShift);
+        document.getElementById('btn-retinal-burn').addEventListener('click', applyRetinalBurn);
+
+        // Attach event listeners - LO-FI
+        document.getElementById('btn-xerox-gen10').addEventListener('click', applyXerox);
+        document.getElementById('btn-microfiche').addEventListener('click', applyMicrofiche);
+        document.getElementById('btn-gameboy-dither').addEventListener('click', applyGameBoyDither);
+
+        // Attach event listeners - GHOST ENGINES
+        document.getElementById('btn-cctv-night').addEventListener('click', applyCCTVNight);
+        document.getElementById('btn-ghost-noise').addEventListener('click', applyGhostNoise);
+        document.getElementById('btn-typographic').addEventListener('click', applyTypographic);
+
         // Initialize
-        updateStatus('READY - DOT MATRIX ENGINE [3 PRESETS] + 25 STATIC FILTERS', '#00CCFF');
+        updateStatus('READY - DOT MATRIX ENGINE [3 PRESETS] + 40 FILTERS (5 NEW CATEGORIES)', '#00CCFF');
     </script>
 </body>
 </html>
