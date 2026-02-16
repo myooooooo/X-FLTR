@@ -67,9 +67,15 @@
     </div>
 
     <div id="filters">
-        <h3 style="color: #00FF41; margin: 8px 0;">GLITCH FILTERS</h3>
+        <h3 style="color: #00FF41; margin: 8px 0;">GLITCH FILTERS (8)</h3>
         <button id="btn-rgb-linear">RGB Split Linear</button>
         <button id="btn-rgb-wave">RGB Split Wave</button>
+        <button id="btn-scanline">Scanline Corrupt</button>
+        <button id="btn-bitcrush">Bit Crush</button>
+        <button id="btn-invert">Invert Colors</button>
+        <button id="btn-posterize">Posterize</button>
+        <button id="btn-solarize">Solarize</button>
+        <button id="btn-chromatic">Chromatic Aberration</button>
     </div>
 
     <script>
@@ -165,12 +171,186 @@
             }
         }
 
+        async function scanlineCorrupt() {
+            try {
+                updateStatus('APPLYING SCANLINE CORRUPT...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "displace",
+                        "horizontalScale": 10,
+                        "verticalScale": 0,
+                        "displacementMap": { "_enum": "displacementMap", "_value": "stretchToFit" },
+                        "undefinedAreas": { "_enum": "undefinedAreas", "_value": "wrapAround" }
+                    }], {});
+                }, { commandName: 'Scanline Corrupt' });
+
+                updateStatus('SUCCESS: SCANLINE APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function bitCrush() {
+            try {
+                updateStatus('APPLYING BIT CRUSH...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "posterization",
+                        "levels": 16
+                    }], {});
+                }, { commandName: 'Bit Crush' });
+
+                updateStatus('SUCCESS: BIT CRUSH APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function invertColors() {
+            try {
+                updateStatus('APPLYING INVERT...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "invert"
+                    }], {});
+                }, { commandName: 'Invert Colors' });
+
+                updateStatus('SUCCESS: COLORS INVERTED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function posterize() {
+            try {
+                updateStatus('APPLYING POSTERIZE...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "posterization",
+                        "levels": 8
+                    }], {});
+                }, { commandName: 'Posterize' });
+
+                updateStatus('SUCCESS: POSTERIZE APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function solarize() {
+            try {
+                updateStatus('APPLYING SOLARIZE...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const doc = app.activeDocument;
+                    const layer = doc.activeLayers[0];
+
+                    const { action } = require('photoshop');
+                    // Apply Curves to create solarization effect
+                    await action.batchPlay([{
+                        "_obj": "curves",
+                        "presetKind": { "_enum": "presetKindType", "_value": "presetKindCustom" },
+                        "adjustment": [{
+                            "_obj": "curvesAdjustment",
+                            "channel": { "_ref": "channel", "_enum": "channel", "_value": "composite" },
+                            "curve": [
+                                { "horizontal": 0, "vertical": 0 },
+                                { "horizontal": 64, "vertical": 191 },
+                                { "horizontal": 128, "vertical": 128 },
+                                { "horizontal": 191, "vertical": 64 },
+                                { "horizontal": 255, "vertical": 255 }
+                            ]
+                        }]
+                    }], {});
+                }, { commandName: 'Solarize' });
+
+                updateStatus('SUCCESS: SOLARIZE APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function chromaticAberration() {
+            try {
+                updateStatus('APPLYING CHROMATIC ABERRATION...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const doc = app.activeDocument;
+                    const originalLayer = doc.activeLayers[0];
+
+                    // Create 3 layers with different offsets
+                    const redLayer = await originalLayer.duplicate();
+                    redLayer.name = "Chromatic R";
+                    await redLayer.translate(5, 5);
+
+                    const greenLayer = await originalLayer.duplicate();
+                    greenLayer.name = "Chromatic G";
+
+                    const blueLayer = await originalLayer.duplicate();
+                    blueLayer.name = "Chromatic B";
+                    await blueLayer.translate(-5, -5);
+
+                    // Set blend modes
+                    redLayer.blendMode = "screen";
+                    greenLayer.blendMode = "screen";
+                    blueLayer.blendMode = "screen";
+
+                    // Lower opacity for subtler effect
+                    redLayer.opacity = 70;
+                    blueLayer.opacity = 70;
+
+                }, { commandName: 'Chromatic Aberration' });
+
+                updateStatus('SUCCESS: CHROMATIC ABERRATION APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
         // Attach event listeners
         document.getElementById('btn-rgb-linear').addEventListener('click', rgbSplitLinear);
         document.getElementById('btn-rgb-wave').addEventListener('click', rgbSplitWave);
+        document.getElementById('btn-scanline').addEventListener('click', scanlineCorrupt);
+        document.getElementById('btn-bitcrush').addEventListener('click', bitCrush);
+        document.getElementById('btn-invert').addEventListener('click', invertColors);
+        document.getElementById('btn-posterize').addEventListener('click', posterize);
+        document.getElementById('btn-solarize').addEventListener('click', solarize);
+        document.getElementById('btn-chromatic').addEventListener('click', chromaticAberration);
 
         // Initialize
-        updateStatus('READY - SELECT A LAYER AND CLICK A FILTER', '#00CCFF');
+        updateStatus('READY - 8 GLITCH FILTERS LOADED', '#00CCFF');
     </script>
 </body>
 </html>
