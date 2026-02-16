@@ -201,12 +201,19 @@
 
                 await executeAsModal(async () => {
                     const { action } = require('photoshop');
+
+                    // SAFE: Use Wave filter instead of Displace (no external file needed)
                     await action.batchPlay([{
-                        "_obj": "displace",
-                        "horizontalScale": 10,
-                        "verticalScale": 0,
-                        "displacementMap": { "_enum": "displacementMap", "_value": "stretchToFit" },
-                        "undefinedAreas": { "_enum": "undefinedAreas", "_value": "wrapAround" }
+                        "_obj": "wave",
+                        "numberOfGenerators": 3,
+                        "minimumWavelength": { "_unit": "pixelsUnit", "_value": 10 },
+                        "maximumWavelength": { "_unit": "pixelsUnit", "_value": 50 },
+                        "minimumAmplitude": { "_unit": "pixelsUnit", "_value": 1 },
+                        "maximumAmplitude": { "_unit": "pixelsUnit", "_value": 10 },
+                        "horizontalScale": { "_unit": "percentUnit", "_value": 100 },
+                        "verticalScale": { "_unit": "percentUnit", "_value": 1 },
+                        "waveType": { "_enum": "waveType", "_value": "sine" },
+                        "undefinedAreas": { "_enum": "undefinedAreas", "_value": "repeatEdgePixels" }
                     }], {});
                 }, { commandName: 'Scanline Corrupt' });
 
