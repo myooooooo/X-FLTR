@@ -56,6 +56,48 @@
         button:hover {
             background: #00DD38;
         }
+
+        /* PARAMETRIC ENGINE STYLES */
+        .engine-panel {
+            border: 3px solid #00FF41;
+            padding: 16px;
+            margin-bottom: 20px;
+            background: #0A0A0A;
+        }
+
+        .engine-title {
+            color: #00FF41;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            margin: 0 0 16px 0;
+            letter-spacing: 2px;
+        }
+
+        .param-control {
+            margin-bottom: 16px;
+        }
+
+        .param-label {
+            color: #00FF41;
+            font-size: 11px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .param-value {
+            color: #00CCFF;
+            font-weight: bold;
+        }
+
+        sp-slider {
+            width: 100%;
+        }
+
+        .render-btn {
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -67,6 +109,61 @@
 
     <div id="status">
         <div id="status-text">PLUGIN LOADED - READY</div>
+    </div>
+
+    <!-- PARAMETRIC ENGINES SECTION -->
+    <div class="engine-panel">
+        <h2 class="engine-title">⬢ THE DOT MATRIX ENGINE ⬢</h2>
+
+        <div class="param-control">
+            <div class="param-label">
+                <span>SCALE / DOT SIZE</span>
+                <span class="param-value" id="value-scale">8</span>
+            </div>
+            <sp-slider
+                id="slider-scale"
+                min="1"
+                max="50"
+                value="8"
+                step="1">
+            </sp-slider>
+        </div>
+
+        <div class="param-control">
+            <div class="param-label">
+                <span>DENSITY / THRESHOLD</span>
+                <span class="param-value" id="value-density">128</span>
+            </div>
+            <sp-slider
+                id="slider-density"
+                min="1"
+                max="255"
+                value="128"
+                step="1">
+            </sp-slider>
+        </div>
+
+        <div class="param-control">
+            <div class="param-label">
+                <span>DISTORTION / JITTER</span>
+                <span class="param-value" id="value-distortion">20</span>
+            </div>
+            <sp-slider
+                id="slider-distortion"
+                min="0"
+                max="100"
+                value="20"
+                step="1">
+            </sp-slider>
+        </div>
+
+        <sp-button
+            id="btn-render-engine"
+            variant="cta"
+            class="render-btn"
+            style="width: 100%;">
+            ⚡ RENDER ENGINE ⚡
+        </sp-button>
     </div>
 
     <div id="filters">
@@ -901,6 +998,102 @@
             }
         }
 
+        // ═══════════════════════════════════════════════════════════
+        // PARAMETRIC ENGINE: THE DOT MATRIX ENGINE
+        // ═══════════════════════════════════════════════════════════
+
+        async function renderDotMatrixEngine() {
+            try {
+                updateStatus('⚡ RENDERING DOT MATRIX ENGINE...', '#FF9900');
+
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                // Retrieve dynamic parameter values from sliders
+                const scaleValue = parseInt(document.getElementById('slider-scale').value);
+                const densityValue = parseInt(document.getElementById('slider-density').value);
+                const distortionValue = parseInt(document.getElementById('slider-distortion').value);
+
+                updateStatus(`⚡ PARAMS: SCALE=${scaleValue} | DENSITY=${densityValue} | JITTER=${distortionValue}`, '#00CCFF');
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // STEP 1: Convert to grayscale for dot matrix base
+                    await action.batchPlay([{
+                        "_obj": "desaturate"
+                    }], {});
+
+                    // STEP 2: Pixelate with dynamic SCALE parameter
+                    await action.batchPlay([{
+                        "_obj": "pixelate",
+                        "cellSize": scaleValue
+                    }], {});
+
+                    // STEP 3: Threshold with dynamic DENSITY parameter
+                    await action.batchPlay([{
+                        "_obj": "thresholdClassEvent",
+                        "level": densityValue
+                    }], {});
+
+                    // STEP 4: Apply distortion/jitter with dynamic DISTORTION parameter
+                    // Using Ripple for organic jitter effect
+                    if (distortionValue > 0) {
+                        await action.batchPlay([{
+                            "_obj": "ripple",
+                            "amount": distortionValue,
+                            "size": { "_enum": "rippleSize", "_value": "medium" }
+                        }], {});
+                    }
+
+                    // STEP 5: Apply halftone pattern for dot matrix aesthetic
+                    await action.batchPlay([{
+                        "_obj": "halftoneScreen",
+                        "angle": { "_unit": "angleUnit", "_value": 45 },
+                        "frequency": Math.max(1, Math.floor(scaleValue / 2)),
+                        "shape": { "_enum": "halftonePattern", "_value": "round" }
+                    }], {});
+
+                }, { commandName: 'Dot Matrix Engine' });
+
+                updateStatus('✓ SUCCESS: DOT MATRIX ENGINE RENDERED', '#00FF41');
+
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+                console.error('Dot Matrix Engine Error:', error);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // EVENT LISTENERS - PARAMETRIC ENGINE
+        // ═══════════════════════════════════════════════════════════
+
+        // Real-time slider value updates
+        const sliderScale = document.getElementById('slider-scale');
+        const sliderDensity = document.getElementById('slider-density');
+        const sliderDistortion = document.getElementById('slider-distortion');
+
+        sliderScale.addEventListener('input', (e) => {
+            document.getElementById('value-scale').textContent = e.target.value;
+        });
+
+        sliderDensity.addEventListener('input', (e) => {
+            document.getElementById('value-density').textContent = e.target.value;
+        });
+
+        sliderDistortion.addEventListener('input', (e) => {
+            document.getElementById('value-distortion').textContent = e.target.value;
+        });
+
+        // Render button
+        document.getElementById('btn-render-engine').addEventListener('click', renderDotMatrixEngine);
+
+        // ═══════════════════════════════════════════════════════════
+        // EVENT LISTENERS - STATIC FILTERS
+        // ═══════════════════════════════════════════════════════════
+
         // Attach event listeners - GLITCH
         document.getElementById('btn-rgb-linear').addEventListener('click', rgbSplitLinear);
         document.getElementById('btn-rgb-wave').addEventListener('click', rgbSplitWave);
@@ -933,7 +1126,7 @@
         document.getElementById('btn-y2k-halftone').addEventListener('click', y2kHalftoneCrush);
 
         // Initialize
-        updateStatus('READY - 25 FILTERS LOADED (8 GLITCH + 8 EXPERIMENTAL + 9 RETRO-TECH)', '#00CCFF');
+        updateStatus('READY - DOT MATRIX ENGINE + 25 STATIC FILTERS LOADED', '#00CCFF');
     </script>
 </body>
 </html>
