@@ -111,6 +111,21 @@
         <div id="status-text">PLUGIN LOADED - READY</div>
     </div>
 
+    <!-- RANDOMIZER SECTION -->
+    <div style="margin-bottom: 16px; padding: 12px; border: 2px solid #FF9900; background: #0A0A0A;">
+        <sp-button
+            id="btn-random"
+            variant="accent"
+            style="width: 100%; font-size: 13px; font-weight: bold;">
+            🎲 SURPRISE ME (RANDOMIZER)
+        </sp-button>
+    </div>
+
+    <!-- TACTICAL CONSOLE -->
+    <div id="console-output" style="margin-bottom: 16px; padding: 10px; border: 1px solid #00CCFF; background: #000000; font-size: 9px; font-family: 'Courier New', monospace; color: #00CCFF; height: 60px; overflow-y: auto;">
+        <div id="console-text">TACTICAL CONSOLE INITIALIZED...</div>
+    </div>
+
     <!-- PARAMETRIC ENGINES SECTION -->
     <div class="engine-panel">
         <h2 class="engine-title">⬢ THE DOT MATRIX ENGINE ⬢</h2>
@@ -250,8 +265,85 @@
             statusEl.style.color = color;
         }
 
+        // ═══════════════════════════════════════════════════════════
+        // TACTICAL LOG SYSTEM
+        // ═══════════════════════════════════════════════════════════
+
+        let consoleBuffer = [];
+
+        function tacticalLog(message) {
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const logLine = `[${timestamp}] ${message}`;
+            consoleBuffer.push(logLine);
+
+            // Keep only last 20 lines
+            if (consoleBuffer.length > 20) {
+                consoleBuffer.shift();
+            }
+
+            const consoleEl = document.getElementById('console-text');
+            consoleEl.innerHTML = consoleBuffer.join('<br>');
+
+            // Auto-scroll to bottom
+            const consoleContainer = document.getElementById('console-output');
+            consoleContainer.scrollTop = consoleContainer.scrollHeight;
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // RANDOMIZER SYSTEM
+        // ═══════════════════════════════════════════════════════════
+
+        async function applyRandom() {
+            try {
+                tacticalLog('>>> RANDOMIZER ACTIVATED <<<');
+                tacticalLog('BOOTING KERNEL...');
+
+                // All available filter button IDs
+                const allFilters = [
+                    'btn-rgb-linear', 'btn-rgb-wave', 'btn-scanline', 'btn-bitcrush',
+                    'btn-pixelate',
+                    'btn-gameboy', 'btn-c64', 'btn-cga', 'btn-duotone', 'btn-y2k-halftone',
+                    'btn-chroma-bleed', 'btn-pixel-sort', 'btn-vcr-tracking',
+                    'btn-flir-thermal', 'btn-sonar-radar', 'btn-ferrofluid',
+                    'btn-anamorphic-flare', 'btn-prism-shift', 'btn-retinal-burn',
+                    'btn-xerox-gen10', 'btn-microfiche', 'btn-gameboy-dither',
+                    'btn-cctv-night', 'btn-ghost-noise', 'btn-typographic'
+                ];
+
+                // Random choice
+                const randomIndex = Math.floor(Math.random() * allFilters.length);
+                const randomButtonId = allFilters[randomIndex];
+                const randomButton = document.getElementById(randomButtonId);
+
+                if (randomButton) {
+                    const filterName = randomButton.textContent;
+
+                    tacticalLog(`INJECTING NOISE...`);
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    tacticalLog(`EXECUTING: ${filterName}`);
+                    updateStatus(`🎲 RANDOMIZER → ${filterName}`, '#FF9900');
+
+                    // Trigger the filter
+                    randomButton.click();
+                } else {
+                    tacticalLog('ERROR: FILTER NOT FOUND');
+                }
+
+            } catch (error) {
+                tacticalLog('ERROR: ' + error.message);
+                updateStatus('RANDOMIZER ERROR', '#FF0000');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // FILTER FUNCTIONS (EXISTING CODE)
+        // ═══════════════════════════════════════════════════════════
+
         async function rgbSplitLinear() {
             try {
+                tacticalLog('>>> RGB SPLIT LINEAR INITIATED');
+                tacticalLog('BOOTING KERNEL...');
                 updateStatus('APPLYING RGB SPLIT LINEAR...', '#FF9900');
 
                 if (!app.activeDocument) {
@@ -263,6 +355,8 @@
                     updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
                     return;
                 }
+
+                tacticalLog('INJECTING CHROMATIC OFFSET...');
 
                 await executeAsModal(async () => {
                     const doc = app.activeDocument;
@@ -315,6 +409,7 @@
 
                 }, { commandName: 'RGB Split Linear' });
 
+                tacticalLog('RGB SPLIT LINEAR COMPLETE ✓');
                 updateStatus('SUCCESS: RGB SPLIT APPLIED', '#00FF41');
 
             } catch (error) {
@@ -1800,6 +1895,12 @@
         document.getElementById('btn-cancel').addEventListener('click', cancelDotMatrixEngine);
 
         // ═══════════════════════════════════════════════════════════
+        // EVENT LISTENERS - RANDOMIZER
+        // ═══════════════════════════════════════════════════════════
+
+        document.getElementById('btn-random').addEventListener('click', applyRandom);
+
+        // ═══════════════════════════════════════════════════════════
         // EVENT LISTENERS - STATIC FILTERS
         // ═══════════════════════════════════════════════════════════
 
@@ -1845,7 +1946,11 @@
         document.getElementById('btn-typographic').addEventListener('click', applyTypographic);
 
         // Initialize
-        updateStatus('READY - DOT MATRIX ENGINE [3 PRESETS] + 25 FILTERS (OPTIMIZED)', '#00CCFF');
+        updateStatus('READY - THE VOID ENGINE PRO [RANDOMIZER + 25 ELITE FILTERS]', '#00CCFF');
+        tacticalLog('═══════════════════════════════════════');
+        tacticalLog('THE VOID ENGINE PRO v2.1 - INITIALIZED');
+        tacticalLog('RANDOMIZER ARMED | 25 FILTERS LOADED');
+        tacticalLog('═══════════════════════════════════════');
     </script>
 </body>
 </html>
