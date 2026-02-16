@@ -90,7 +90,7 @@
         <button id="btn-pixelate">Pixelate</button>
         <button id="btn-radial-blur">Radial Blur</button>
 
-        <h3 style="color: #00FF41; margin: 16px 0 8px 0;">RETRO-TECH (8)</h3>
+        <h3 style="color: #00FF41; margin: 16px 0 8px 0;">RETRO-TECH (9)</h3>
         <button id="btn-gameboy">GameBoy 4-Color</button>
         <button id="btn-c64">Commodore 64</button>
         <button id="btn-cga">CGA 4-Color</button>
@@ -99,6 +99,7 @@
         <button id="btn-threshold">Threshold B&W</button>
         <button id="btn-duotone">Duotone</button>
         <button id="btn-vintage">Vintage Film</button>
+        <button id="btn-y2k-halftone">Y2K Halftone Crush</button>
     </div>
 
     <script>
@@ -813,6 +814,93 @@
             }
         }
 
+        async function y2kHalftoneCrush() {
+            try {
+                updateStatus('APPLYING Y2K HALFTONE CRUSH...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+
+                    // Step 1: Extreme contrast conversion (Threshold for pure B&W)
+                    await action.batchPlay([{
+                        "_obj": "thresholdClassEvent",
+                        "level": 128
+                    }], {});
+
+                    // Step 2: Apply Color Halftone with large radius for aggressive dots
+                    await action.batchPlay([{
+                        "_obj": "colorHalftone",
+                        "maximumRadius": 12,
+                        "screenAngleChannel1": 45,
+                        "screenAngleChannel2": 45,
+                        "screenAngleChannel3": 45,
+                        "screenAngleChannel4": 45
+                    }], {});
+
+                    // Step 3: Gradient Map for Red/Black recolorization
+                    // Create gradient from Black (#000000) to Red (#FF3300)
+                    await action.batchPlay([{
+                        "_obj": "gradientMap",
+                        "gradientMap": {
+                            "_obj": "gradientClassEvent",
+                            "name": "Y2K Red",
+                            "gradientForm": { "_enum": "gradientForm", "_value": "customStops" },
+                            "interfaceIconFrameDimmed": 4096,
+                            "colors": [
+                                {
+                                    "_obj": "colorStop",
+                                    "location": 0,
+                                    "midpoint": 50,
+                                    "type": { "_enum": "colorStopType", "_value": "userStop" },
+                                    "color": {
+                                        "_obj": "RGBColor",
+                                        "red": 0,
+                                        "grain": 0,
+                                        "blue": 0
+                                    }
+                                },
+                                {
+                                    "_obj": "colorStop",
+                                    "location": 4096,
+                                    "midpoint": 50,
+                                    "type": { "_enum": "colorStopType", "_value": "userStop" },
+                                    "color": {
+                                        "_obj": "RGBColor",
+                                        "red": 255,
+                                        "grain": 51,
+                                        "blue": 0
+                                    }
+                                }
+                            ],
+                            "transparency": [
+                                {
+                                    "_obj": "transparencyStop",
+                                    "location": 0,
+                                    "midpoint": 50,
+                                    "opacity": { "_unit": "percentUnit", "_value": 100 }
+                                },
+                                {
+                                    "_obj": "transparencyStop",
+                                    "location": 4096,
+                                    "midpoint": 50,
+                                    "opacity": { "_unit": "percentUnit", "_value": 100 }
+                                }
+                            ]
+                        }
+                    }], {});
+
+                }, { commandName: 'Y2K Halftone Crush' });
+
+                updateStatus('SUCCESS: Y2K HALFTONE CRUSH APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
         // Attach event listeners - GLITCH
         document.getElementById('btn-rgb-linear').addEventListener('click', rgbSplitLinear);
         document.getElementById('btn-rgb-wave').addEventListener('click', rgbSplitWave);
@@ -842,9 +930,10 @@
         document.getElementById('btn-threshold').addEventListener('click', thresholdBW);
         document.getElementById('btn-duotone').addEventListener('click', duotone);
         document.getElementById('btn-vintage').addEventListener('click', vintageFilm);
+        document.getElementById('btn-y2k-halftone').addEventListener('click', y2kHalftoneCrush);
 
         // Initialize
-        updateStatus('READY - 24 FILTERS LOADED (8 GLITCH + 8 EXPERIMENTAL + 8 RETRO-TECH)', '#00CCFF');
+        updateStatus('READY - 25 FILTERS LOADED (8 GLITCH + 8 EXPERIMENTAL + 9 RETRO-TECH)', '#00CCFF');
     </script>
 </body>
 </html>
