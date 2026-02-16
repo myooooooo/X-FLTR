@@ -76,6 +76,16 @@
         <button id="btn-posterize">Posterize</button>
         <button id="btn-solarize">Solarize</button>
         <button id="btn-chromatic">Chromatic Aberration</button>
+
+        <h3 style="color: #00FF41; margin: 16px 0 8px 0;">EXPERIMENTAL (10)</h3>
+        <button id="btn-edge-detect">Edge Detect</button>
+        <button id="btn-emboss">Emboss</button>
+        <button id="btn-gaussian-blur">Gaussian Blur</button>
+        <button id="btn-sharpen">Sharpen</button>
+        <button id="btn-oil-paint">Oil Paint</button>
+        <button id="btn-mosaic">Mosaic</button>
+        <button id="btn-pixelate">Pixelate</button>
+        <button id="btn-radial-blur">Radial Blur</button>
     </div>
 
     <script>
@@ -339,7 +349,190 @@
             }
         }
 
-        // Attach event listeners
+        // EXPERIMENTAL FILTERS
+        async function edgeDetect() {
+            try {
+                updateStatus('DETECTING EDGES...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "findEdges"
+                    }], {});
+                }, { commandName: 'Edge Detect' });
+
+                updateStatus('SUCCESS: EDGES DETECTED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function emboss() {
+            try {
+                updateStatus('APPLYING EMBOSS...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "emboss",
+                        "angle": { "_unit": "angleUnit", "_value": 135 },
+                        "height": 3,
+                        "amount": 100
+                    }], {});
+                }, { commandName: 'Emboss' });
+
+                updateStatus('SUCCESS: EMBOSS APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function gaussianBlur() {
+            try {
+                updateStatus('APPLYING GAUSSIAN BLUR...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "gaussianBlur",
+                        "radius": { "_unit": "pixelsUnit", "_value": 10 }
+                    }], {});
+                }, { commandName: 'Gaussian Blur' });
+
+                updateStatus('SUCCESS: BLUR APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function sharpen() {
+            try {
+                updateStatus('SHARPENING...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "sharpen"
+                    }], {});
+                }, { commandName: 'Sharpen' });
+
+                updateStatus('SUCCESS: SHARPENED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function oilPaint() {
+            try {
+                updateStatus('APPLYING OIL PAINT...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "oilPaint",
+                        "stylization": 5,
+                        "cleanliness": 5,
+                        "brushScale": 5,
+                        "angularDirection": 0,
+                        "shine": 0
+                    }], {});
+                }, { commandName: 'Oil Paint' });
+
+                updateStatus('SUCCESS: OIL PAINT APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function mosaic() {
+            try {
+                updateStatus('APPLYING MOSAIC...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "mosaic",
+                        "cellSize": { "_unit": "pixelsUnit", "_value": 15 }
+                    }], {});
+                }, { commandName: 'Mosaic' });
+
+                updateStatus('SUCCESS: MOSAIC APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function pixelate() {
+            try {
+                updateStatus('PIXELATING...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "mosaic",
+                        "cellSize": { "_unit": "pixelsUnit", "_value": 8 }
+                    }], {});
+                }, { commandName: 'Pixelate' });
+
+                updateStatus('SUCCESS: PIXELATED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        async function radialBlur() {
+            try {
+                updateStatus('APPLYING RADIAL BLUR...', '#FF9900');
+                if (!app.activeDocument || !app.activeDocument.activeLayers[0]) {
+                    updateStatus('ERROR: NO LAYER SELECTED', '#FF0000');
+                    return;
+                }
+
+                await executeAsModal(async () => {
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "radialBlur",
+                        "amount": 15,
+                        "blurMethod": { "_enum": "radialBlurMethod", "_value": "spin" },
+                        "blurQuality": { "_enum": "radialBlurQuality", "_value": "good" }
+                    }], {});
+                }, { commandName: 'Radial Blur' });
+
+                updateStatus('SUCCESS: RADIAL BLUR APPLIED', '#00FF41');
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+            }
+        }
+
+        // Attach event listeners - GLITCH
         document.getElementById('btn-rgb-linear').addEventListener('click', rgbSplitLinear);
         document.getElementById('btn-rgb-wave').addEventListener('click', rgbSplitWave);
         document.getElementById('btn-scanline').addEventListener('click', scanlineCorrupt);
@@ -349,8 +542,18 @@
         document.getElementById('btn-solarize').addEventListener('click', solarize);
         document.getElementById('btn-chromatic').addEventListener('click', chromaticAberration);
 
+        // Attach event listeners - EXPERIMENTAL
+        document.getElementById('btn-edge-detect').addEventListener('click', edgeDetect);
+        document.getElementById('btn-emboss').addEventListener('click', emboss);
+        document.getElementById('btn-gaussian-blur').addEventListener('click', gaussianBlur);
+        document.getElementById('btn-sharpen').addEventListener('click', sharpen);
+        document.getElementById('btn-oil-paint').addEventListener('click', oilPaint);
+        document.getElementById('btn-mosaic').addEventListener('click', mosaic);
+        document.getElementById('btn-pixelate').addEventListener('click', pixelate);
+        document.getElementById('btn-radial-blur').addEventListener('click', radialBlur);
+
         // Initialize
-        updateStatus('READY - 8 GLITCH FILTERS LOADED', '#00CCFF');
+        updateStatus('READY - 16 FILTERS LOADED (8 GLITCH + 8 EXPERIMENTAL)', '#00CCFF');
     </script>
 </body>
 </html>
