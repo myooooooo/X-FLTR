@@ -115,6 +115,24 @@
     <div class="engine-panel">
         <h2 class="engine-title">⬢ THE DOT MATRIX ENGINE ⬢</h2>
 
+        <!-- PRESETS ROW -->
+        <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #00FF41;">
+            <div style="color: #00FF41; font-size: 10px; margin-bottom: 6px; text-align: center;">
+                PRESETS
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;">
+                <sp-button id="btn-preset-gameboy" variant="secondary" size="s" style="font-size: 9px;">
+                    GameBoy
+                </sp-button>
+                <sp-button id="btn-preset-matrix" variant="secondary" size="s" style="font-size: 9px;">
+                    Matrix
+                </sp-button>
+                <sp-button id="btn-preset-cctv" variant="secondary" size="s" style="font-size: 9px;">
+                    CCTV
+                </sp-button>
+            </div>
+        </div>
+
         <div class="param-control">
             <div class="param-label">
                 <span>SCALE / DOT SIZE</span>
@@ -157,17 +175,25 @@
             </sp-slider>
         </div>
 
-        <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #00FF41;">
+        <!-- ACTION BUTTONS (APPLY / CANCEL) -->
+        <div style="margin-top: 16px; padding-top: 12px; border-top: 2px solid #00FF41;">
             <div style="color: #00CCFF; font-size: 10px; text-align: center; margin-bottom: 8px;">
                 ⚡ LIVE PREVIEW MODE ⚡
             </div>
-            <sp-button
-                id="btn-reset-engine"
-                variant="secondary"
-                class="render-btn"
-                style="width: 100%;">
-                ↻ RESET PREVIEW
-            </sp-button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                <sp-button
+                    id="btn-apply"
+                    variant="cta"
+                    style="font-size: 11px; font-weight: bold;">
+                    ✓ APPLY
+                </sp-button>
+                <sp-button
+                    id="btn-cancel"
+                    variant="warning"
+                    style="font-size: 11px; font-weight: bold;">
+                    ✕ CANCEL
+                </sp-button>
+            </div>
         </div>
     </div>
 
@@ -1007,6 +1033,35 @@
         // PARAMETRIC ENGINE: THE DOT MATRIX ENGINE
         // ═══════════════════════════════════════════════════════════
 
+        // PRESETS DATA MODEL (JSON)
+        const ENGINE_PRESETS = {
+            gameboy: {
+                name: "GameBoy",
+                scale: 4,
+                density: 140,
+                distortion: 0
+            },
+            matrix: {
+                name: "Matrix",
+                scale: 2,
+                density: 100,
+                distortion: 35
+            },
+            cctv: {
+                name: "CCTV",
+                scale: 12,
+                density: 160,
+                distortion: 15
+            }
+        };
+
+        // DEFAULT VALUES for reset
+        const ENGINE_DEFAULTS = {
+            scale: 8,
+            density: 128,
+            distortion: 20
+        };
+
         // Global state for non-destructive preview system
         let engineState = {
             originalLayer: null,
@@ -1129,6 +1184,140 @@
         const debouncedRender = debounce(renderDotMatrixEngine, 300);
 
         // ═══════════════════════════════════════════════════════════
+        // PRESET MANAGEMENT SYSTEM
+        // ═══════════════════════════════════════════════════════════
+
+        function loadPreset(presetKey) {
+            const preset = ENGINE_PRESETS[presetKey];
+            if (!preset) return;
+
+            updateStatus(`⚡ LOADING PRESET: ${preset.name}`, '#00CCFF');
+
+            // Update slider values
+            const sliderScale = document.getElementById('slider-scale');
+            const sliderDensity = document.getElementById('slider-density');
+            const sliderDistortion = document.getElementById('slider-distortion');
+
+            sliderScale.value = preset.scale;
+            sliderDensity.value = preset.density;
+            sliderDistortion.value = preset.distortion;
+
+            // Update displayed values
+            document.getElementById('value-scale').textContent = preset.scale;
+            document.getElementById('value-density').textContent = preset.density;
+            document.getElementById('value-distortion').textContent = preset.distortion;
+
+            // Trigger live preview update
+            debouncedRender();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // APPLY (BAKE) FUNCTION - Finalize preview to production
+        // ═══════════════════════════════════════════════════════════
+
+        async function applyDotMatrixEngine() {
+            try {
+                if (!engineState.previewLayer) {
+                    updateStatus('ERROR: NO PREVIEW TO APPLY', '#FF0000');
+                    return;
+                }
+
+                updateStatus('⚡ BAKING PREVIEW TO LAYER...', '#FF9900');
+
+                await executeAsModal(async () => {
+                    const doc = app.activeDocument;
+
+                    // Hide original layer
+                    if (engineState.originalLayer) {
+                        engineState.originalLayer.visible = false;
+                    }
+
+                    // Rename preview layer to final name
+                    engineState.previewLayer.name = "Dot Matrix [BAKED]";
+
+                    // Select the baked layer
+                    const { action } = require('photoshop');
+                    await action.batchPlay([{
+                        "_obj": "select",
+                        "_target": [{ "_ref": "layer", "_name": engineState.previewLayer.name }]
+                    }], {});
+
+                }, { commandName: 'Bake Dot Matrix' });
+
+                // Reset state for next use
+                engineState.originalLayer = null;
+                engineState.previewLayer = null;
+
+                // Reset sliders to defaults
+                resetSlidersToDefaults();
+
+                updateStatus('✓ SUCCESS: EFFECT BAKED TO LAYER', '#00FF41');
+
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+                console.error('Apply Error:', error);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // CANCEL FUNCTION - Clean preview and reset
+        // ═══════════════════════════════════════════════════════════
+
+        async function cancelDotMatrixEngine() {
+            try {
+                updateStatus('⚡ CANCELING PREVIEW...', '#FF9900');
+
+                if (engineState.previewLayer) {
+                    await executeAsModal(async () => {
+                        // Delete preview layer (strict DOM cleanup)
+                        await engineState.previewLayer.delete();
+
+                        // Reselect original layer if exists
+                        if (engineState.originalLayer) {
+                            const { action } = require('photoshop');
+                            await action.batchPlay([{
+                                "_obj": "select",
+                                "_target": [{ "_ref": "layer", "_id": engineState.originalLayer.id }]
+                            }], {});
+                        }
+
+                    }, { commandName: 'Cancel Preview' });
+                }
+
+                // Reset state
+                engineState.originalLayer = null;
+                engineState.previewLayer = null;
+
+                // Reset sliders to defaults
+                resetSlidersToDefaults();
+
+                updateStatus('✓ PREVIEW CANCELED - RESET TO DEFAULTS', '#00FF41');
+
+            } catch (error) {
+                updateStatus('ERROR: ' + error.message, '#FF0000');
+                console.error('Cancel Error:', error);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // UTILITY: Reset sliders to default values
+        // ═══════════════════════════════════════════════════════════
+
+        function resetSlidersToDefaults() {
+            const sliderScale = document.getElementById('slider-scale');
+            const sliderDensity = document.getElementById('slider-density');
+            const sliderDistortion = document.getElementById('slider-distortion');
+
+            sliderScale.value = ENGINE_DEFAULTS.scale;
+            sliderDensity.value = ENGINE_DEFAULTS.density;
+            sliderDistortion.value = ENGINE_DEFAULTS.distortion;
+
+            document.getElementById('value-scale').textContent = ENGINE_DEFAULTS.scale;
+            document.getElementById('value-density').textContent = ENGINE_DEFAULTS.density;
+            document.getElementById('value-distortion').textContent = ENGINE_DEFAULTS.distortion;
+        }
+
+        // ═══════════════════════════════════════════════════════════
         // EVENT LISTENERS - PARAMETRIC ENGINE (LIVE PREVIEW)
         // ═══════════════════════════════════════════════════════════
 
@@ -1152,24 +1341,24 @@
             debouncedRender(); // Trigger live preview with anti-crash debounce
         });
 
-        // Reset button: Clear preview layer and reset state
-        const btnReset = document.getElementById('btn-reset-engine');
-        if (btnReset) {
-            btnReset.addEventListener('click', async () => {
-                try {
-                    if (engineState.previewLayer) {
-                        await executeAsModal(async () => {
-                            await engineState.previewLayer.delete();
-                        }, { commandName: 'Reset Preview' });
-                    }
-                    engineState.originalLayer = null;
-                    engineState.previewLayer = null;
-                    updateStatus('✓ PREVIEW RESET', '#00FF41');
-                } catch (error) {
-                    updateStatus('ERROR: ' + error.message, '#FF0000');
-                }
-            });
-        }
+        // PRESET BUTTONS: Load predefined parameter sets
+        document.getElementById('btn-preset-gameboy').addEventListener('click', () => {
+            loadPreset('gameboy');
+        });
+
+        document.getElementById('btn-preset-matrix').addEventListener('click', () => {
+            loadPreset('matrix');
+        });
+
+        document.getElementById('btn-preset-cctv').addEventListener('click', () => {
+            loadPreset('cctv');
+        });
+
+        // APPLY BUTTON: Bake preview to final layer
+        document.getElementById('btn-apply').addEventListener('click', applyDotMatrixEngine);
+
+        // CANCEL BUTTON: Delete preview and reset to defaults
+        document.getElementById('btn-cancel').addEventListener('click', cancelDotMatrixEngine);
 
         // ═══════════════════════════════════════════════════════════
         // EVENT LISTENERS - STATIC FILTERS
@@ -1207,7 +1396,7 @@
         document.getElementById('btn-y2k-halftone').addEventListener('click', y2kHalftoneCrush);
 
         // Initialize
-        updateStatus('READY - DOT MATRIX ENGINE + 25 STATIC FILTERS LOADED', '#00CCFF');
+        updateStatus('READY - DOT MATRIX ENGINE [3 PRESETS] + 25 STATIC FILTERS', '#00CCFF');
     </script>
 </body>
 </html>
